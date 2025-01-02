@@ -1,0 +1,29 @@
+we have to create a sever (express server) so that it "listens" to the request from client side and listen on a port so that anyone can connect 
+
+
+app.use((req,res)=>{
+    res.send("hello from the server")
+}) 
+this function is called a response handler
+
+
+
+
+app.use("/",(req,res)=>{
+    res.send("hello from the server")
+})
+
+app.use("/test",(req,res)=>{
+    res.send("hello from test page")
+})
+
+app.use("/hello",(req,res)=>{
+    res.send("hello from hello page")
+}) 
+if you use this order the issue is with .use method 
+even if you change the port to /hello or /test it shows "hello from the server"
+why?
+    bcz .use matches the "/" first and  shows it in the hello and test port 
+    fix 
+        1- .use-> .get
+        2- change the order d
