@@ -1,11 +1,11 @@
 we have to create a sever (express server) so that it "listens" to the request from client side and listen on a port so that anyone can connect 
-
 ``` js
 app.use((req,res)=>{
     res.send("hello from the server")
 }) 
+///this function is called a response handler
+//NOTE :- the first parameter should be req and the second res 
 ```
-this function is called a response handler
 
 
 
@@ -123,7 +123,7 @@ app.get("/user",
     }
 )
 ```
-If the 1st handeler consist of sending a response it will show an error "Cannot set headers after they are sent to the client" this means that the 1st handeler has already sent a response and cannot send the response again 
+If the 1st handeler consist of sending a response it will show an error "Cannot set headers after they are sent to the client" this means that the 1st handeler has already sent a response and cannot send the response again  
 Bcz a TCP connection is made btw a client and a server. Postman is the client and once the request is made and the response is sent the connection closes. here we are still trying to send a response even after the connection is lost that's why it shows this error 
 
 
@@ -186,3 +186,79 @@ app.get("route",[rh1,rh2,rh3,rh4])
 app.get("route",[rh1,rh2],rh3,rh4)
 ```
 They all give the same response
+
+
+
+
+for simplicity we're calling them route handelers. But now let's be more accurate.  
+Route handelers are one that actually handle the route and send the response back, rest are called middelwares
+```js
+app.get("/user",
+    (req,res,next)=>{
+    console.log("1st handeler");
+    next(); //middleware
+    },
+    (req,res)=>{
+        console.log("2nd handeler");
+        res.send("this is the 2nd response")  //route handelers 
+    }
+)
+```
+Whenever server gets a request it chains through the middleware to reach the route handelers and send the response back 
+
+
+Now lets unpack the need of middleware 
+
+```js
+app.get("/admin/getAllData",(req,res)=>{
+    //this is the logic to authorize the user which you have to write in /deleteAlldata and all the urls. So will you do it one by one by pasting the same logic all over again? NO right? This brings in the need of middleware 
+    const token = "xyz"
+    const isAdminAuthorized = token === "xyz"
+    if(isAdminAuthorized){
+        res.send("user is authorized")
+    }
+    else{
+        res.status(401).send("user  not authorized ")
+    }
+})
+app.get("/admin/deleteAllData",(req,res)=>{
+    //logic to delete data
+    res.send("All data dlt")
+})
+```
+
+this is the most suitable approach->
+here the .use runs for all requests starting from /admin and validates the user.
+```js
+app.use("/admin",(req,res,next)=>{
+     //logic to authorize user
+    
+     const token = "xyz"
+     const isAdminAuthorized = token === "xyz"
+     if(isAdminAuthorized){
+        next()
+     }
+     else{
+        res.status(401).send("user not authorized")
+     }
+})
+app.get("/admin/getAllData",(req,res,next)=>{
+    res.send("all data sent")   
+})
+app.get("/admin/deleteAllData",(req,res)=>{
+    //logic to delete data
+    res.send("All data dlt")
+})
+```
+
+you can also move auth code to a different file and import it and then use it like this 
+```js
+app.use("/admin",adminAuth)
+```
+
+or if there is just one request you can do it like this 
+```js
+app.get("/user",userAuth,(req,res)=>{
+    res.send("user data sent")
+})
+```
