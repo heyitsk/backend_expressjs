@@ -76,7 +76,19 @@ app.get("/admin/deleteAllData",(req,res)=>{
     res.send("All data dlt")
 })
 app.get("/user",userAuth,(req,res)=>{
+    try{
+    //logiv for db calls and other stuff
+    throw new Error("asjbdaksdalksdbasl")
     res.send("user data sent")
+    }
+    catch(err){
+        res.status(500).send("unable to send data")
+    }
+})
+app.use("/",(err,req,res,next)=>{
+    if(err){
+        res.status(500).send("something went wrong")
+    }
 })
 app.listen(3000,()=>{
     console.log("server succesffuly listening on port 300"); 

@@ -262,3 +262,39 @@ app.get("/user",userAuth,(req,res)=>{
     res.send("user data sent")
 })
 ```
+the other important part is *handling error*.   
+either you can show random errors or gracefully handle them
+```js
+app.get("/user",userAuth,(req,res)=>{
+    //logiv for db calls and other stuff
+    throw new Error("asjbdaksdalksdbasl") //suppose this is the error that comes
+    res.send("user data sent")
+})
+```
+this error is not gracefully handeled and shows very poor text to handle it gracefully you can  
+```js
+app.use("/",(err,req,res,next)=>{
+    if(err){
+        res.status(500).send("something went wrong")
+    }
+})
+```
+so what this does is basically for all routes *(bcz we have used .use which check for all route starting with / which are all the routes)* checks if error is there and gracefully handeles them  
+>NOTE :- whenever you're using the above error handling always use this at the end of the code 
+another approach to gracefully handle error is to use try catch.
+```js
+app.get("/user",userAuth,(req,res)=>{
+    try{
+    //logiv for db calls and other stuff
+    throw new Error("asjbdaksdalksdbasl")
+    res.send("user data sent")
+    }
+    catch(err){
+        res.status(500).send("unable to send data")
+    }
+})
+```
+But here the question is both the logics of handling the errors are there but only the 2nd one runs sending "unable to send data" and not the .use one. WHY?   
+it happens bcz the the error is throwed is the .get request and is handeled there only no error goes to / request 
+
+> 
