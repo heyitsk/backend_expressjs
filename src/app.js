@@ -1,6 +1,7 @@
 const express = require("express")
 const {adminAuth,userAuth} = require("./middleware/auth.js")
-
+const connectCluster = require("./config/database.js")
+const User = require("./models/user.js")
 const app = express()
 //this creates an express js application 
 
@@ -67,29 +68,57 @@ const app = express()
 //     }
 
 // )
-app.use("/admin",adminAuth)
-app.get("/admin/getAllData",(req,res,next)=>{
-    res.send("all data sent")
-})
-app.get("/admin/deleteAllData",(req,res)=>{
-    //logic to delete data
-    res.send("All data dlt")
-})
-app.get("/user",userAuth,(req,res)=>{
+// app.use("/admin",adminAuth)
+// app.get("/admin/getAllData",(req,res,next)=>{
+//     res.send("all data sent")
+// })
+// app.get("/admin/deleteAllData",(req,res)=>{
+//     //logic to delete data
+//     res.send("All data dlt")
+// })
+// app.get("/user",userAuth,(req,res)=>{
+//     try{
+//     //logiv for db calls and other stuff
+//     throw new Error("asjbdaksdalksdbasl")
+//     res.send("user data sent")
+//     }
+//     catch(err){
+//         res.status(500).send("unable to send data")
+//     }
+// })
+// app.use("/",(err,req,res,next)=>{
+//     if(err){
+//         res.status(500).send("something went wrong")
+//     }
+// })
+
+app.post("/signup",async (req,res)=>{
+    const user = new User({
+        firstName:"asdasd",
+        lastName:"asdasd",
+        password:12345,
+        emailId:"assd@gmail.com"
+    }) //we are creating a new instance of a user model 
+
+    //whenver you are doing DB calls always do then inside try catch 
     try{
-    //logiv for db calls and other stuff
-    throw new Error("asjbdaksdalksdbasl")
-    res.send("user data sent")
+        await user.save() //since it returns a promise so use async await 
+        res.send("user added succesfully")
     }
     catch(err){
-        res.status(500).send("unable to send data")
+        res.status(400).send("error saving the user")
     }
 })
-app.use("/",(err,req,res,next)=>{
-    if(err){
-        res.status(500).send("something went wrong")
-    }
-})
-app.listen(3000,()=>{
-    console.log("server succesffuly listening on port 300"); 
-})
+
+connectCluster()
+    .then(()=>
+        {
+            console.log("cluster connection established");
+            app.listen(3000,()=>{
+                console.log("server succesffuly listening on port 300"); 
+            })
+    })
+    .catch((err)=>
+        {console.log("cluster cannot be connected");
+    })
+

@@ -4,12 +4,13 @@
   "description": "backend project using express js",
   "main": "index.js",
   "scripts": {
-    "dev":"nodemon src/app.js",
-    "start":"node src/app.js"
+    "dev": "nodemon src/app.js",
+    "start": "node src/app.js"
   },
   "author": "kushagra",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "mongoose": "^8.9.5"
   }
 }

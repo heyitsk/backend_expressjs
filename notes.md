@@ -297,4 +297,61 @@ app.get("/user",userAuth,(req,res)=>{
 But here the question is both the logics of handling the errors are there but only the 2nd one runs sending "unable to send data" and not the .use one. WHY?   
 it happens bcz the the error is throwed is the .get request and is handeled there only no error goes to / request 
 
-> 
+>mongodb+srv://kushagradpr:<db_password>@learningnode.jvcpg.mongodb.net/  
+    this established a connection with a cluster (which can contain many databases)
+mongodb+srv://kushagradpr:<db_password>@learningnode.jvcpg.mongodb.net/HelloWorld   
+    this establishes a connection with HelloWorld database
+
+
+The current issue is the server first starts listening on the port and then the database connection is established.  
+But why is this an issue?
+It is an issue bcz the server first starts listening requests on the port while the database is not connected. So if the user is sending request it cannot access anything as the database is not connected  
+so what one should do is establish a connection with the databse first and then start listening on the port 
+
+```js
+//old code 
+//databse.js
+const connectCLuster = async()=>{
+    await mongoose.connect("mongodb+srv://kushagradpr:ipzHZS8FROU1ca7R@learningnode.jvcpg.mongodb.net/") 
+}
+connectCLuster()
+    .then(()=>{console.log("cluster connection established");
+    })
+    .catch((err)=>{console.log("cluster cannot be connected");
+    })
+
+module.exports = connectCLuster
+
+//app.js
+const express = require("express")
+const {adminAuth,userAuth} = require("./middleware/auth.js")
+require("./config/database.js")
+const app = express()
+app.listen(3000,()=>{
+    console.log("server succesffuly listening on port 300"); 
+})
+```
+
+```js 
+//new code 
+//databse.js
+const connectCLuster = async()=>{
+    await mongoose.connect("mongodb+srv://kushagradpr:ipzHZS8FROU1ca7R@learningnode.jvcpg.mongodb.net/") 
+}
+
+
+module.exports = connectCLuster
+
+//app.js
+connectCluster()
+    .then(()=>
+        { //now once the connection to database is establlished only then it starts listening on the port
+            console.log("cluster connection established");
+            app.listen(3000,()=>{
+                console.log("server succesffuly listening on port 300"); 
+            })
+    })
+    .catch((err)=>
+        {console.log("cluster cannot be connected");
+    })
+```
