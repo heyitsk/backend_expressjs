@@ -91,14 +91,12 @@ const app = express()
 //         res.status(500).send("something went wrong")
 //     }
 // })
-
+app.use(express.json())
 app.post("/signup",async (req,res)=>{
-    const user = new User({
-        firstName:"asdasd",
-        lastName:"asdasd",
-        password:12345,
-        emailId:"assd@gmail.com"
-    }) //we are creating a new instance of a user model 
+    console.log(req.body);
+    
+    
+    const user = new User(req.body) //we are creating a new instance of a user model 
 
     //whenver you are doing DB calls always do then inside try catch 
     try{

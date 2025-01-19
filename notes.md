@@ -49,7 +49,7 @@ YOU can write regex instead of strings
 
 ```js
 app.get("/user",(req,res)=>{
-    console.log(req.query); this is how you read what's sent 
+    console.log(req.query); //this is how you read what's sent throught the url
     res.send({
         "firstname":"kushagra",
         "lastname":"agarwal"
@@ -60,7 +60,7 @@ app.get("/user",(req,res)=>{
 to make the routes dynamic like /user/101 
 ```js
 app.get("/user/:userId",(req,res)=>{
-    console.log(req.params); this will print { userId: '101' }
+    console.log(req.params); //this will print { userId: '101' }
     
     
     res.send({
@@ -354,4 +354,25 @@ connectCluster()
     .catch((err)=>
         {console.log("cluster cannot be connected");
     })
+```
+Right now we are hardcoding the data by ourselves but we want the user to enter the data and when we make the post call it gets save to the database 
+```js
+const user = new User({
+        firstName:"asdasd",
+        lastName:"asdasd",
+        password:12345,
+        emailId:"assd@gmail.com"
+    }) 
+```
+
+>Difference btw **JSON** and **JS object**
+JSON is a format of exhchanging data btw sevrer and client whereas js object is a data structure for storing data in key value pair  
+In json format both key value pair should be enclosed within "" whereas in js object no need to enclose key in ""  
+JSON can easily be converted in JS obejct and vice versa 
+
+```js
+console.log(req.body)
+// this logs undefined bcz the data we've passed from the post request is in json format and the engine cannot read it. SO we have to first convert it into js object which the engine can read for that we use a middleware provided by the express called express.json()
+app.use(express.json())
+//since no url is provided this will work for all the routes and the apis converting all json to js object
 ```
