@@ -93,7 +93,7 @@ const app = express()
 // })
 app.use(express.json())
 app.post("/signup",async (req,res)=>{
-    console.log(req.body);
+    // console.log(req.body);   
     
     
     const user = new User(req.body) //we are creating a new instance of a user model 
