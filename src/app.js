@@ -127,6 +127,24 @@ app.get("/signup",async (req,res)=>{
     }
 
 })
+//get users by email id using findOne. 
+//IF two entries with same email id are present it'll return the oldest entry with that email id 
+// app.get("/signup",async (req,res)=>{
+//     const userEmail = req.body.emailId
+//     try{
+//     const user = await User.findOne({emailId:userEmail})
+//     if(!user){
+//         res.send("unable to find the user")
+//     }
+//     else{
+//         res.send(user)
+//     }
+//     }
+//     catch(err){
+//         res.status(400).send("cannot find user")
+//     }
+
+// })
 
 
 //get all users /feed api 
