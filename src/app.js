@@ -146,6 +146,26 @@ app.get("/signup",async (req,res)=>{
 
 // })
 
+//get user by _id
+// app.get("/signup",async (req,res)=>{
+//     // const userId = req.body._id
+//     console.log(userId);
+//     try{
+//     const user = await User.findById({_id:userId}) 
+//     //.find returns an array of object whereas .findOne returns one single object 
+//     if(!user){
+//         res.send("unable to find the user")
+//     }
+//     else{
+//         res.send(user)
+//     }
+//     }
+//     catch(err){
+//         res.status(400).send("cannot find user")
+//     }
+
+// })
+
 
 //get all users /feed api 
 app.get("/feed",async (req,res)=>{
