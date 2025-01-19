@@ -108,6 +108,40 @@ app.post("/signup",async (req,res)=>{
     }
 })
 
+//get users by email id
+app.get("/signup",async (req,res)=>{
+    const userEmail = req.body.emailId
+    // console.log(userEmail);
+    try{
+    const userList = await User.find({emailId:userEmail}) 
+    //.find returns an array of object whereas .findOne returns one single object 
+    if(userList.length===0){
+        res.send("unable to find the user")
+    }
+    else{
+        res.send(userList)
+    }
+    }
+    catch(err){
+        res.status(400).send("cannot find user")
+    }
+
+})
+
+
+//get all users /feed api 
+app.get("/feed",async (req,res)=>{
+    try{
+    const allUser = await User.find({}) //this will give all documents from the database 
+    res.send(allUser)
+    }
+    catch(err){
+        res.status(400).send("cannot find users")
+
+    }
+
+})
+
 connectCluster()
     .then(()=>
         {
