@@ -3,6 +3,8 @@ const {adminAuth,userAuth} = require("./middleware/auth.js")
 const connectCluster = require("./config/database.js")
 const User = require("./models/user.js")
 const app = express()
+const {signUpDataValidation} = require("./utils/validation.js")
+const bcrypt = require("bcrypt")
 //this creates an express js application 
 
 
@@ -94,17 +96,28 @@ const app = express()
 app.use(express.json())
 app.post("/signup",async (req,res)=>{
     // console.log(req.body);   
-    
-    
-    const user = new User(req.body) //we are creating a new instance of a user model 
+    const {firstName, lastName, password, emailId}= req.body
+
+    //encrypt the passwword 
+    const passwordHash = await bcrypt.hash(password,10)
+
+
+    const user = new User({
+        firstName,
+        lastName,
+        password:passwordHash,
+        emailId
+    }) //we are creating a new instance of a user model 
 
     //whenver you are doing DB calls always do then inside try catch 
     try{
+    signUpDataValidation(req) //we are adding this in the try catch block bcz the error it throws will be handeled by the catch blocks
+
         await user.save() //since it returns a promise so use async await 
         res.send("user added succesfully")
     }
     catch(err){
-        res.status(400).send("error saving the user"+err.message)
+        res.status(400).send("error: "+err.message)
     }
 })
 

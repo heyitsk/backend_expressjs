@@ -376,3 +376,45 @@ console.log(req.body)
 app.use(express.json())
 //since no url is provided this will work for all the routes and the apis converting all json to js object
 ```
+
+```js
+gender:{
+        type:String,
+        validate(value){
+            if(!["male","female","others"].includes(value)){
+                throw new Error("gender data is not valid")
+            }
+        }
+    },
+``` 
+the issue with this validate() is that by default it only works when we add new document to the collection not when we update the data  
+so we have to explicitly do 
+```js
+const userInfo = await User.findByIdAndUpdate({_id:userId},data,
+            {returnDocument:"after",
+                runValidators:true
+            },
+```
+there are multiple ways to add validation to the data user is sending. 
+1. you can either set the validation at schema or database level
+2. you can create helper functions which check the user data after entering before going into db 
+
+>The flow for /signup api is 
+>  1. you validate the data entered 
+>  2. you encrypt the password and then save it 
+
+```js
+const user = new User(req.body) 
+//this is not a good way to extract body of a request. you should extract the fields you require by naming them 
+const user = new User({
+        firstName,
+        lastName,
+        password:passwordHash,
+        emailId
+    })
+```
+whenever you encrypt a password using hash function you add 2 parameters, 1st is the password, 2nd is the salt rounds.  
+if salt rounds increases the encyption increases but time also increases so best chosen number is 10
+```js
+await bcrypt.hash(password,10)
+```

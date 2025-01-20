@@ -17,12 +17,7 @@ const userSchema = new mongoose.Schema({
         required:true,
         unique:true,
         lowercase:true,
-        trim:true,
-        validate(value){
-            if(!validator.isEmail(value)){
-                throw new Error("invalid email address:"+value)
-            }
-        }
+        trim:true
     },
     password:{
         type:String,
