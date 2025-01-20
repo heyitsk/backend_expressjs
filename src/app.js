@@ -104,7 +104,7 @@ app.post("/signup",async (req,res)=>{
         res.send("user added succesfully")
     }
     catch(err){
-        res.status(400).send("error saving the user")
+        res.status(400).send("error saving the user"+err.message)
     }
 })
 
