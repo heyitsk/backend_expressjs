@@ -414,7 +414,8 @@ const user = new User({
     })
 ```
 whenever you encrypt a password using hash function you add 2 parameters, 1st is the password, 2nd is the salt rounds.  
-if salt rounds increases the encyption increases but time also increases so best chosen number is 10
+if salt rounds increases the encyption increases but time also increases so best chosen number is 10  
+This bcrypt.hash function returns you a promise so use async await
 ```js
 await bcrypt.hash(password,10)
 ```

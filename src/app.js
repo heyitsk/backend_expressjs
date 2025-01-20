@@ -206,6 +206,27 @@ app.delete("/user",async(req,res)=>{
     }
 })
 
+app.post("/login",async (req,res)=>{
+    //work flow -> it checks if email present in db -> if yes then it checks if password matches
+    try{
+        const {emailId, password} = req.body
+        const user = await User.findOne({emailId:emailId})
+        if(!user){
+            throw new Error("email not present in db")
+        }
+        const isPasswordValid = await bcrypt.compare(password,user.password)
+        if(isPasswordValid){
+            res.send("login successfull")
+        }
+        else{
+            throw new Error("password does not match")
+        }
+    }
+    catch(err){
+        res.status(400).send("error: "+err.message)
+    }
+})
+
 //update data fo the user using pathc
 app.patch("/user/:userId",async(req,res)=>{
     const data = req.body
