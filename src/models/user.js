@@ -2,23 +2,52 @@ const mongoose = require("mongoose")
 
 const userSchema = new mongoose.Schema({
     firstName:{
-        type:String
+        type:String,
+        required:true,
+        unique:true,
+        // minLength:4,
+        // maxLength:30
     },
     lastName:{
         type:String
     },
     emailId:{
-        type:String
+        type:String,
+        required:true,
+        unique:true,
+        lowercase:true,
+        trim:true
     },
     password:{
-        type:Number
+        type:Number,
     },
     age:{
-        type:Number
+        type:Number,
+        min:18
+
     },
     gender:{
-        type:String
-    }
+        type:String,
+        validate(value){
+            if(!["male","female","others"].includes(value)){
+                throw new Error("gender data is not valid")
+            }
+        }
+    },
+    photoUrl:{
+        type:String,
+    },
+    about:{
+        type:String,
+        default:"this is a default description of the user"
+    },
+    skills:{
+        type:[String]
+    },
+},
+{
+    timestamps:true,
+    //this enables mongoose to record the timestamp at which the request was made to create the documennt and at what time the document was updated
 })
 
 const User = mongoose.model("User",userSchema)
