@@ -194,24 +194,32 @@ app.delete("/user",async(req,res)=>{
 })
 
 //update data fo the user using pathc
-app.patch("/user",async(req,res)=>{
+app.patch("/user/:userId",async(req,res)=>{
     const data = req.body
-    const userId= req.body._id
+    const userId= req.params.userId
     try{
-
+        const UPDATES_ALLOWED = ["firstName","lastName","gender","about","password","skills"]
+        const isAllowed = Object.keys(data).every((key)=>UPDATES_ALLOWED.includes(key))
+        if(!isAllowed){
+            throw new Error("update not allowed")
+        }
+        if(data.skills.length>5){
+            throw new Error("skills cannot be more than 5")
+        }
          const userInfo = await User.findByIdAndUpdate({_id:userId},data,
             {returnDocument:"after",
                 runValidators:true
             },
             
         )
-        console.log(userInfo);
+        // console.log(userInfo);
+        
         
         res.send("data updates succesfully")
     
     }
     catch(err){
-        res.status(400).send("something went wrong")
+        res.status(400).send("update not allowed"+"-"+err.message)
     }
 }) //this does not update the _id field bcz its not present in the schema of the model. SO anything let's suppose you try to add another fields while updating which are not in the schema it'll ignore all of them 
 
