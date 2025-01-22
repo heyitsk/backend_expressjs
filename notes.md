@@ -419,3 +419,10 @@ This bcrypt.hash function returns you a promise so use async await
 ```js
 await bcrypt.hash(password,10)
 ```
+So how validation occurs is  
+whenever you login -> your server creates a jwt token inside a cookie and send back it to the user -> now each time user hits another api call it is the work of a browser or the postman to send back the cookie which they have stored 
+when you create a jwt token
+```js
+            const token = jwt.sign({_id:user._id},"asdasd1asdasdasd#")
+``` 
+there are 3 parameters, 1st is the thing you want to hide inside the token, 2nd is the secret or privtae key which only u will know and the third are thr options used like expires in etc.

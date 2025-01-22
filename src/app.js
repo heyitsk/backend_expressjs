@@ -5,6 +5,8 @@ const User = require("./models/user.js")
 const app = express()
 const {signUpDataValidation} = require("./utils/validation.js")
 const bcrypt = require("bcrypt")
+const cookieParser = require("cookie-parser")
+const jwt = require("jsonwebtoken")
 //this creates an express js application 
 
 
@@ -94,6 +96,7 @@ const bcrypt = require("bcrypt")
 //     }
 // })
 app.use(express.json())
+app.use(cookieParser())
 app.post("/signup",async (req,res)=>{
     // console.log(req.body);   
     const {firstName, lastName, password, emailId}= req.body
@@ -216,6 +219,11 @@ app.post("/login",async (req,res)=>{
         }
         const isPasswordValid = await bcrypt.compare(password,user.password)
         if(isPasswordValid){
+
+            //creating a token 
+            const token = jwt.sign({_id:user._id},"KUSH@1234#")
+            res.cookie("token",token) //this is how you send a cookie with a token
+
             res.send("login successfull")
         }
         else{
@@ -257,6 +265,30 @@ app.patch("/user/:userId",async(req,res)=>{
     }
 }) //this does not update the _id field bcz its not present in the schema of the model. SO anything let's suppose you try to add another fields while updating which are not in the schema it'll ignore all of them 
 
+app.get("/profile",async (req,res)=>{
+    try 
+    {const cookies = req.cookies
+    const {token} = cookies
+    if(!token){
+        throw new Error("token not found")
+    }
+    //validate cookie 
+    const decodedMsg = jwt.verify(token,"KUSH@1234#")
+    // console.log(decodedMsg);
+    const {_id} = decodedMsg;
+    // console.log("logged in user is: "+ _id);
+    
+    const user = await User.findById({_id:_id})
+    if(!user){
+        throw new Error("user does not exist")
+    }
+    
+    res.send(user)}
+    catch(err){
+        res.status(400).send("Error"+"-"+err.message)
+    }
+    
+})
 connectCluster()
     .then(()=>
         {
