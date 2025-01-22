@@ -217,11 +217,11 @@ app.post("/login",async (req,res)=>{
         if(!user){
             throw new Error("email not present in db")
         }
-        const isPasswordValid = await bcrypt.compare(password,user.password)
+        const isPasswordValid = await user.validatePassword(password)
         if(isPasswordValid){
 
             //creating a token 
-            const token = jwt.sign({_id:user._id},"KUSH@1234#",{expiresIn:"1d"})
+            const token = await user.getJWT() //we only have to do this bcz now the user schema has this method with it 
 
             //create a cookie and send the token with it 
             res.cookie("token",token,{expires: new Date(Date.now()+8*3600000)})//this will expire in 8 hours 

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose")
 const validator = require("validator")
-
+const jwt = require("jsonwebtoken")
+const bcrypt = require("bcrypt")
 const userSchema = new mongoose.Schema({
     firstName:{
         type:String,
@@ -60,7 +61,19 @@ const userSchema = new mongoose.Schema({
     timestamps:true,
     //this enables mongoose to record the timestamp at which the request was made to create the documennt and at what time the document was updated
 })
+//NOTE:- never use arrow funtion for scehma methods
+userSchema.methods.getJWT = async function (){
+    const user = this //it points to that particular instanse of the user model which we are loggin in from
 
+   const token = await jwt.sign({_id:user._id},"KUSH@1234#",{expiresIn:"1d"})
+   return token;
+}
+userSchema.methods.validatePassword = async function(passwordEnteredByUser){
+    const user = this
+    const passwordHash = user.password
+    const isPasswordValid = bcrypt.compare(passwordEnteredByUser,passwordHash)
+    return isPasswordValid
+}
 const User = mongoose.model("User",userSchema)
 
 module.exports = User 
