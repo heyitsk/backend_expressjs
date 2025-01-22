@@ -1,5 +1,5 @@
 const express = require("express")
-const {adminAuth,userAuth} = require("./middleware/auth.js")
+const {userAuth} = require("./middleware/auth.js")
 const connectCluster = require("./config/database.js")
 const User = require("./models/user.js")
 const app = express()
@@ -221,8 +221,10 @@ app.post("/login",async (req,res)=>{
         if(isPasswordValid){
 
             //creating a token 
-            const token = jwt.sign({_id:user._id},"KUSH@1234#")
-            res.cookie("token",token) //this is how you send a cookie with a token
+            const token = jwt.sign({_id:user._id},"KUSH@1234#",{expiresIn:"1d"})
+
+            //create a cookie and send the token with it 
+            res.cookie("token",token,{expires: new Date(Date.now()+8*3600000)})//this will expire in 8 hours 
 
             res.send("login successfull")
         }
@@ -265,20 +267,10 @@ app.patch("/user/:userId",async(req,res)=>{
     }
 }) //this does not update the _id field bcz its not present in the schema of the model. SO anything let's suppose you try to add another fields while updating which are not in the schema it'll ignore all of them 
 
-app.get("/profile",async (req,res)=>{
+app.get("/profile",userAuth, async (req,res)=>{
     try 
-    {const cookies = req.cookies
-    const {token} = cookies
-    if(!token){
-        throw new Error("token not found")
-    }
-    //validate cookie 
-    const decodedMsg = jwt.verify(token,"KUSH@1234#")
-    // console.log(decodedMsg);
-    const {_id} = decodedMsg;
-    // console.log("logged in user is: "+ _id);
-    
-    const user = await User.findById({_id:_id})
+    {
+    const user = req.user
     if(!user){
         throw new Error("user does not exist")
     }
