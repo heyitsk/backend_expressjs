@@ -2,6 +2,8 @@ const express = require("express")
 const profileRouter = express.Router()
 const User = require("../models/user")
 const {userAuth} = require("../middleware/auth")
+const {profileEditDataValidation} = require("../utils/validation")
+const bcrypt = require("bcrypt")
 
 
 
@@ -34,32 +36,48 @@ profileRouter.delete("/user",async(req,res)=>{
 
 
 //update data fo the user using pathc
-profileRouter.patch("/user/:userId",async(req,res)=>{
-    const data = req.body
-    const userId= req.params.userId
+profileRouter.patch("/profile/edit",userAuth,async(req,res)=>{
     try{
-        const UPDATES_ALLOWED = ["firstName","lastName","gender","about","password","skills"]
-        const isAllowed = Object.keys(data).every((key)=>UPDATES_ALLOWED.includes(key))
-        if(!isAllowed){
-            throw new Error("update not allowed")
+        const user = req.user
+        if (!profileEditDataValidation(req)){
+            throw new Error("cannot update the field")
         }
-        if(data.skills.length>5){
-            throw new Error("skills cannot be more than 5")
-        }
-         const userInfo = await User.findByIdAndUpdate({_id:userId},data,
-            {returnDocument:"after",
-                runValidators:true
-            },
-            
-        )
-        // console.log(userInfo);
-        
-        
-        res.send("data updates succesfully")
+        Object.keys(req.body).forEach((key)=>user[key]=req.body[key])
+
+        await user.save()
+        res.send(`${user.firstName} profile udpated successfull`)
     
     }
     catch(err){
         res.status(400).send("update not allowed"+"-"+err.message)
     }
-}) //this does not update the _id field bcz its not present in the schema of the model. SO anything let's suppose you try to add another fields while updating which are not in the schema it'll ignore all of them 
+}) 
+//this does not update the _id field bcz its not present in the schema of the model. SO anything let's suppose you try to add another fields while updating which are not in the schema it'll ignore all of them 
+
+
+profileRouter.patch("/profile/changepassword",userAuth,async (req,res)=>{
+    try{
+        const user = req.user 
+        // console.log(user);
+        const passwordHash = user.password
+        const passwordEntered = req.body.password
+        const newPassword = req.body.newPassword
+        const isPasswordMatch = await bcrypt.compare(passwordEntered,passwordHash)
+        // console.log(isPasswordMatch);
+        if(!isPasswordMatch){
+            throw new Error("password doesn't match")
+        }
+        const newHash = await bcrypt.hash(newPassword,10)
+        user.password = newHash
+        await user.save()
+        res.send("password successfully updated")
+
+
+        
+
+    }
+    catch(err){
+        res.status(400).send("error:- ",err.messsage)
+    }
+})
 module.exports = profileRouter
