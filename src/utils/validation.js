@@ -13,4 +13,12 @@ const signUpDataValidation = (req)=>{
         throw new Error("not a valid email address")
     }
 }
-module.exports={signUpDataValidation}
+
+const profileEditDataValidation = (req)=>{
+    const data = req.body
+    const allowedFields = ["firstName","lastName","age","gender","about","skills"]
+    const isEditAllowed = Object.keys(data).every(field=>allowedFields.includes(field))
+    return isEditAllowed
+
+}
+module.exports={signUpDataValidation, profileEditDataValidation}
