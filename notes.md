@@ -427,3 +427,29 @@ when you create a jwt token
 ``` 
 there are 3 parameters, 1st is the thing you want to hide inside the token, 2nd is the secret or privtae key which only u will know and the third are thr options used like expires in etc.  
 you can set timer for both cookies and tokens in which they will expire 
+```js
+ if(isPasswordValid){
+
+            //creating a token 
+            const token = jwt.sign({_id:user._id},"KUSH@1234#",{expiresIn:"1d"})
+
+            //create a cookie and send the token with it 
+            res.cookie("token",token,{expires: new Date(Date.now()+8*3600000)})//this will expire in 8 hours 
+
+            res.send("login successfull")
+        }
+```
+there is no issue in this code. But it is a best practise to offload the code to a helper function as this jwt token is attached to every user so we can add this in schema methods so that every user can have its own jwt token while creating an intance of the user model 
+
+
+## app router 
+our app.js file should be clean so we'll make routers for that. We'll group apis who's work is related like the sign up and login in auth and we'll make a router for it  
+router.use() works same as app.use() and for all methods   
+then we'll export those routers and import in our app.js file 
+
+```js
+app.use("/",authRouter)
+app.use("/",profileRouter)
+app.use("/",feedRouter)
+```
+whenever user wants to search for a specific route it'll go through each of the route and if found it will send thr response back and won't go any further

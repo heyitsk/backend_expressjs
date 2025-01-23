@@ -1,10 +1,6 @@
 const express = require("express")
-const {userAuth} = require("./middleware/auth.js")
 const connectCluster = require("./config/database.js")
-const User = require("./models/user.js")
 const app = express()
-const {signUpDataValidation} = require("./utils/validation.js")
-const bcrypt = require("bcrypt")
 const cookieParser = require("cookie-parser")
 const jwt = require("jsonwebtoken")
 //this creates an express js application 
@@ -97,190 +93,17 @@ const jwt = require("jsonwebtoken")
 // })
 app.use(express.json())
 app.use(cookieParser())
-app.post("/signup",async (req,res)=>{
-    // console.log(req.body);   
-    const {firstName, lastName, password, emailId}= req.body
 
-    //encrypt the passwword 
-    const passwordHash = await bcrypt.hash(password,10)
+const authRouter = require("./routes/auth.js")
+const profileRouter = require("./routes/profile.js")
+const feedRouter = require("./routes/feed.js")
 
 
-    const user = new User({
-        firstName,
-        lastName,
-        password:passwordHash,
-        emailId
-    }) //we are creating a new instance of a user model 
-
-    //whenver you are doing DB calls always do then inside try catch 
-    try{
-    signUpDataValidation(req) //we are adding this in the try catch block bcz the error it throws will be handeled by the catch blocks
-
-        await user.save() //since it returns a promise so use async await 
-        res.send("user added succesfully")
-    }
-    catch(err){
-        res.status(400).send("error: "+err.message)
-    }
-})
-
-//get users by email id
-app.get("/signup",async (req,res)=>{
-    const userEmail = req.body.emailId
-    // console.log(userEmail);
-    try{
-    const userList = await User.find({emailId:userEmail}) 
-    //.find returns an array of object whereas .findOne returns one single object 
-    if(userList.length===0){
-        res.send("unable to find the user")
-    }
-    else{
-        res.send(userList)
-    }
-    }
-    catch(err){
-        res.status(400).send("cannot find user")
-    }
-
-})
-//get users by email id using findOne. 
-//IF two entries with same email id are present it'll return the oldest entry with that email id 
-// app.get("/signup",async (req,res)=>{
-//     const userEmail = req.body.emailId
-//     try{
-//     const user = await User.findOne({emailId:userEmail})
-//     if(!user){
-//         res.send("unable to find the user")
-//     }
-//     else{
-//         res.send(user)
-//     }
-//     }
-//     catch(err){
-//         res.status(400).send("cannot find user")
-//     }
-
-// })
-
-//get user by _id
-// app.get("/signup",async (req,res)=>{
-//     // const userId = req.body._id
-//     console.log(userId);
-//     try{
-//     const user = await User.findById({_id:userId}) 
-//     //.find returns an array of object whereas .findOne returns one single object 
-//     if(!user){
-//         res.send("unable to find the user")
-//     }
-//     else{
-//         res.send(user)
-//     }
-//     }
-//     catch(err){
-//         res.status(400).send("cannot find user")
-//     }
-
-// })
+app.use("/",authRouter)
+app.use("/",profileRouter)
+app.use("/",feedRouter)
 
 
-//get all users /feed api 
-app.get("/feed",async (req,res)=>{
-    try{
-    const allUser = await User.find({}) //this will give all documents from the database 
-    res.send(allUser)
-    }
-    catch(err){
-        res.status(400).send("cannot find users")
-
-    }
-
-})
-
-//delete user by _id 
-app.delete("/user",async(req,res)=>{
-    const userId = req.body._id
-    try{
-
-        const user = await User.findByIdAndDelete({_id:userId})
-        res.send("user deleted")
-    }
-    catch(err){
-        res.send("some error ocurred cannot delete the user")
-    }
-})
-
-app.post("/login",async (req,res)=>{
-    //work flow -> it checks if email present in db -> if yes then it checks if password matches
-    try{
-        const {emailId, password} = req.body
-        const user = await User.findOne({emailId:emailId})
-        if(!user){
-            throw new Error("email not present in db")
-        }
-        const isPasswordValid = await user.validatePassword(password)
-        if(isPasswordValid){
-
-            //creating a token 
-            const token = await user.getJWT() //we only have to do this bcz now the user schema has this method with it 
-
-            //create a cookie and send the token with it 
-            res.cookie("token",token,{expires: new Date(Date.now()+8*3600000)})//this will expire in 8 hours 
-
-            res.send("login successfull")
-        }
-        else{
-            throw new Error("password does not match")
-        }
-    }
-    catch(err){
-        res.status(400).send("error: "+err.message)
-    }
-})
-
-//update data fo the user using pathc
-app.patch("/user/:userId",async(req,res)=>{
-    const data = req.body
-    const userId= req.params.userId
-    try{
-        const UPDATES_ALLOWED = ["firstName","lastName","gender","about","password","skills"]
-        const isAllowed = Object.keys(data).every((key)=>UPDATES_ALLOWED.includes(key))
-        if(!isAllowed){
-            throw new Error("update not allowed")
-        }
-        if(data.skills.length>5){
-            throw new Error("skills cannot be more than 5")
-        }
-         const userInfo = await User.findByIdAndUpdate({_id:userId},data,
-            {returnDocument:"after",
-                runValidators:true
-            },
-            
-        )
-        // console.log(userInfo);
-        
-        
-        res.send("data updates succesfully")
-    
-    }
-    catch(err){
-        res.status(400).send("update not allowed"+"-"+err.message)
-    }
-}) //this does not update the _id field bcz its not present in the schema of the model. SO anything let's suppose you try to add another fields while updating which are not in the schema it'll ignore all of them 
-
-app.get("/profile",userAuth, async (req,res)=>{
-    try 
-    {
-    const user = req.user
-    if(!user){
-        throw new Error("user does not exist")
-    }
-    
-    res.send(user)}
-    catch(err){
-        res.status(400).send("Error"+"-"+err.message)
-    }
-    
-})
 connectCluster()
     .then(()=>
         {
