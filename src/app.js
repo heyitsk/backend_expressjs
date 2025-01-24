@@ -97,11 +97,13 @@ app.use(cookieParser())
 const authRouter = require("./routes/auth.js")
 const profileRouter = require("./routes/profile.js")
 const feedRouter = require("./routes/feed.js")
+const connectionRouter = require("./routes/connectionRequest.js")
 
 
 app.use("/",authRouter)
 app.use("/",profileRouter)
 app.use("/",feedRouter)
+app.use("/",connectionRouter)
 
 
 connectCluster()

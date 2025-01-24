@@ -452,4 +452,7 @@ app.use("/",authRouter)
 app.use("/",profileRouter)
 app.use("/",feedRouter)
 ```
-whenever user wants to search for a specific route it'll go through each of the route and if found it will send thr response back and won't go any further
+whenever user wants to search for a specific route it'll go through each of the route and if found it will send thr response back and won't go any further  
+
+
+Now we need to make a connection request schema. why? bcz yk user schema defines the identity of a user so it has separate schema now the interation btw 2 users is the connection which also should have a different schema 
