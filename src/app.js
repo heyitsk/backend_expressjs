@@ -98,12 +98,15 @@ const authRouter = require("./routes/auth.js")
 const profileRouter = require("./routes/profile.js")
 const feedRouter = require("./routes/feed.js")
 const connectionRouter = require("./routes/connectionRequest.js")
+const userRouter = require("./routes/user.js")
 
 
 app.use("/",authRouter)
 app.use("/",profileRouter)
 app.use("/",feedRouter)
 app.use("/",connectionRouter)
+app.use("/",userRouter)
+
 
 
 connectCluster()

@@ -1,5 +1,5 @@
 const express = require("express")
-const authRouter = express.Router()
+// const authRouter = express.Router()
 const {userAuth} = require("../middleware/auth")
 const ConnectionReq = require("../models/connectionRequest")
 const connectionRouter = express.Router()
@@ -59,5 +59,44 @@ connectionRouter.post("/request/send/:status/:userId",userAuth, async (req,res)=
 
 
 })
+
+connectionRouter.post("/request/review/:status/:requestId",userAuth, async (req,res)=>{
+    try{
+        //check for entered status 
+        //check for requestId present in 
+        //check for status should be interested in db
+        //check for loggedinuser = touserid in db
+        
+        const {status, requestId} = req.params
+        const loggedInUser = req.user
+
+        const allowedStatus = ["accepted","rejected"]
+        if(!allowedStatus.includes(status)){
+            throw new Error("status not valid")
+        }
+
+        const request = await ConnectionReq.findOne({
+            _id: requestId,
+            toUserId: loggedInUser._id,
+            status:"interested"
+
+        })
+        if(!request){
+            throw new Error("connection request not found")
+        }
+
+        request.status = status 
+        const reqSave = await request.save()
+        
+        res.send("connection request accepted")
+
+
+    }
+    catch(err){
+        res.status(400).send(`error:- ${err.message}`);
+    }
+})
+
+
 
 module.exports = connectionRouter
