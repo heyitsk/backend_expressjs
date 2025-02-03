@@ -57,6 +57,11 @@ userRouter.get("/users/connections", userAuth, async(req, res)=>{
 userRouter.get("/user/feed", userAuth, async(req, res)=>{
     try{
         const loggedInUser = req.user;
+        let limit = parseInt(req.query.limit) || 10;
+        limit >50 ? 50 : limit;
+        const page = parseInt(req.query.page) || 1;
+        const skip = (page - 1) * limit 
+        
         const connectionRequests = await ConnectionReq.find({
             $or:[
                 {toUserId:loggedInUser._id},
@@ -83,9 +88,9 @@ userRouter.get("/user/feed", userAuth, async(req, res)=>{
             
             // If the logged-in user has at least one connection request (sent or received), their ID would be in hideUsersFromFeed, making {_id: {$ne: loggedInUser._id}} redundant in those cases.
             // However, if the user has no connection requests, their ID won’t be in hideUsersFromFeed, and they could see their own profile in the feed without this condition.
-            
+
             ]
-        }).select("firstName lastName age gender about skills")
+        }).select("firstName lastName age gender about skills").skip(skip).limit(limit)
 
         res.json({users})
         

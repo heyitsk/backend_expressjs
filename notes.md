@@ -466,3 +466,11 @@ and this is how you convert this set into array ->
 ```js
 Array.from(hideUsersFromFeed)
 ```
+concept of paging ->  
+
+/feed?page=1&limit=10 => 1-10 => skip(0) limit(10)  
+/feed?page=2&limit=10 => 11-20 => skip(10) limit(10)  
+/feed?page=3&limit=10 => 21-30 => skip(20) limit(10)
+
+>Note :- /feed?query this is the query and is obtained by req.query.abc  
+        /feed/:params this is the paramss and is obtained by req.params.abc
